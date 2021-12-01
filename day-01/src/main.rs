@@ -11,13 +11,13 @@ fn main() {
 
     println!("part1 = {}", part1);
 
-    let part2: Vec<i32> = input
+    let part2 = input
         .windows(3)
-        .map(IntoIterator::into_iter)
-        .map(Iterator::sum)
-        .collect();
-
-    let part2 = part2.windows(2).filter(|nums| nums[0] < nums[1]).count();
+        .map(|numbers| numbers.iter().sum())
+        .collect::<Vec<i32>>()
+        .windows(2)
+        .filter(|numbers| numbers[0] < numbers[1])
+        .count();
 
     println!("part2 = {}", part2);
 }
