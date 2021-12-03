@@ -34,6 +34,35 @@ impl Add<&Cmd> for Position {
     }
 }
 
+#[derive(Debug, Default)]
+struct Position2 {
+    x: i32,
+    y: i32,
+    aim: i32,
+}
+
+impl Add<&Cmd> for Position2 {
+    type Output = Position2;
+
+    fn add(self, cmd: &Cmd) -> Self::Output {
+        match cmd {
+            Cmd::Forward(magnitude) => Position2 {
+                x: self.x + magnitude,
+                y: self.y + magnitude * self.aim,
+                ..self
+            },
+            Cmd::Down(offset) => Position2 {
+                aim: self.aim + offset,
+                ..self
+            },
+            Cmd::Up(offset) => Position2 {
+                aim: self.aim - offset,
+                ..self
+            },
+        }
+    }
+}
+
 impl From<&str> for Cmd {
     fn from(string: &str) -> Self {
         let (direction, magnitude) = string.split_once(' ').unwrap();
@@ -59,4 +88,10 @@ fn main() {
         .fold(Position::default(), |acc, cmd| acc + cmd);
 
     println!("part1 = {}", final_position.x * final_position.y);
+
+    let final_position = commands
+        .iter()
+        .fold(Position2::default(), |acc, cmd| acc + cmd);
+
+    println!("part2 = {}", final_position.x * final_position.y);
 }
