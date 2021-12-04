@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Debug)]
 struct Board([[u8; 5]; 5]);
 
@@ -85,14 +87,24 @@ fn main() {
     let lines: Vec<&str> = lines.collect();
     let boards: Vec<Board> = lines.chunks_exact(6).map(From::from).collect();
     let mut board_states: Vec<BoardState> = vec![Default::default(); boards.len()];
+    let mut boards_that_have_won = HashSet::with_capacity(boards.len());
 
     'outer: for number in numbers {
-        for (board, board_state) in boards.iter().zip(&mut board_states) {
+        for (board_number, (board, board_state)) in boards.iter().zip(&mut board_states).enumerate()
+        {
             board.mark_number(number, board_state);
 
             if board_state.has_won() {
-                println!("part1 = {}", board.score(number, board_state));
-                break 'outer;
+                if boards_that_have_won.is_empty() {
+                    println!("part1 = {}", board.score(number, board_state));
+                }
+
+                boards_that_have_won.insert(board_number);
+
+                if boards_that_have_won.len() == boards.len() {
+                    println!("part 2 = {}", board.score(number, board_state));
+                    break 'outer;
+                }
             }
         }
     }
