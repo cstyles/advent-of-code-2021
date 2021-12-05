@@ -62,9 +62,21 @@ impl Line {
         self.start.x == self.end.x
     }
 
-    // TODO: Iterator!
-    fn points(&self) -> Vec<Point> {
-        let diff = match (self.start.x.cmp(&self.end.x), self.start.y.cmp(&self.end.y)) {
+    fn points(&self) -> Points {
+        Points::new(*self)
+    }
+}
+
+struct Points {
+    start: Point,
+    end: Point,
+    diff: Point,
+    finished: bool,
+}
+
+impl Points {
+    pub fn new(line: Line) -> Self {
+        let diff = match (line.start.x.cmp(&line.end.x), line.start.y.cmp(&line.end.y)) {
             (Ordering::Less, Ordering::Less) => Point::new(1, 1),
             (Ordering::Less, Ordering::Equal) => Point::new(1, 0),
             (Ordering::Less, Ordering::Greater) => Point::new(1, -1),
@@ -76,15 +88,31 @@ impl Line {
             (Ordering::Greater, Ordering::Greater) => Point::new(-1, -1),
         };
 
-        let mut start = self.start;
-        let mut points: Vec<Point> = vec![start];
-
-        while start != self.end {
-            start = start + diff;
-            points.push(start);
+        Self {
+            start: line.start,
+            end: line.end,
+            diff,
+            finished: false,
         }
+    }
+}
 
-        points
+impl Iterator for Points {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.start == self.end {
+            if self.finished {
+                None
+            } else {
+                self.finished = true;
+                Some(self.start)
+            }
+        } else {
+            let point = self.start;
+            self.start = self.start + self.diff;
+            Some(point)
+        }
     }
 }
 
