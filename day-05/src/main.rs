@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::ops::Add;
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
@@ -63,20 +64,16 @@ impl Line {
 
     // TODO: Iterator!
     fn points(&self) -> Vec<Point> {
-        let diff = if self.is_horizontal() {
-            if self.start.x <= self.end.x {
-                Point::new(1, 0)
-            } else {
-                Point::new(-1, 0)
-            }
-        } else if self.is_vertical() {
-            if self.start.y <= self.end.y {
-                Point::new(0, 1)
-            } else {
-                Point::new(0, -1)
-            }
-        } else {
-            unreachable!("not reachable in part 1");
+        let diff = match (self.start.x.cmp(&self.end.x), self.start.y.cmp(&self.end.y)) {
+            (Ordering::Less, Ordering::Less) => Point::new(1, 1),
+            (Ordering::Less, Ordering::Equal) => Point::new(1, 0),
+            (Ordering::Less, Ordering::Greater) => Point::new(1, -1),
+            (Ordering::Equal, Ordering::Less) => Point::new(0, 1),
+            (Ordering::Equal, Ordering::Equal) => Point::new(0, 0),
+            (Ordering::Equal, Ordering::Greater) => Point::new(0, -1),
+            (Ordering::Greater, Ordering::Less) => Point::new(-1, 1),
+            (Ordering::Greater, Ordering::Equal) => Point::new(-1, 0),
+            (Ordering::Greater, Ordering::Greater) => Point::new(-1, -1),
         };
 
         let mut start = self.start;
@@ -93,10 +90,15 @@ impl Line {
 
 fn main() {
     let input = include_str!("../input.txt");
+    let lines: Vec<Line> = input.lines().map(Line::from).collect();
 
-    let lines: Vec<Line> = input
-        .lines()
-        .map(Line::from)
+    part1(&lines);
+    part2(&lines);
+}
+
+fn part1(lines: &[Line]) {
+    let lines: Vec<&Line> = lines
+        .iter()
         .filter(|line| line.is_vertical() || line.is_horizontal())
         .collect();
 
@@ -118,4 +120,25 @@ fn main() {
     }
 
     println!("part1 = {}", count);
+}
+
+fn part2(lines: &[Line]) {
+    let mut grid = vec![vec![0u16; 1000]; 1000];
+
+    for line in lines {
+        for point in line.points() {
+            grid[point.x as usize][point.y as usize] += 1;
+        }
+    }
+
+    let mut count = 0;
+    for row in grid {
+        for cell in row {
+            if cell > 1 {
+                count += 1;
+            }
+        }
+    }
+
+    println!("part2 = {}", count);
 }
