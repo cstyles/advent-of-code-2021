@@ -125,14 +125,12 @@ fn main() {
 }
 
 fn part1(lines: &[Line]) {
-    let lines: Vec<&Line> = lines
-        .iter()
-        .filter(|line| line.is_vertical() || line.is_horizontal())
-        .collect();
-
     let mut grid = vec![vec![0u16; 1000]; 1000];
 
-    for line in lines {
+    for line in lines
+        .iter()
+        .filter(|line| line.is_vertical() || line.is_horizontal())
+    {
         for point in line.points() {
             grid[point.x as usize][point.y as usize] += 1;
         }
