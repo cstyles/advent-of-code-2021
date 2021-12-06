@@ -148,9 +148,7 @@ fn main() {
 }
 
 fn populate_grid<'a>(grid: &mut [Vec<u16>], lines: impl Iterator<Item = &'a Line>) {
-    for line in lines {
-        for point in line.points() {
-            grid[point.x as usize][point.y as usize] += 1;
-        }
+    for point in lines.flat_map(Line::points) {
+        grid[point.x as usize][point.y as usize] += 1;
     }
 }
