@@ -120,51 +120,37 @@ fn main() {
     let input = include_str!("../input.txt");
     let lines: Vec<Line> = input.lines().map(Line::from).collect();
 
-    part1(&lines);
-    part2(&lines);
-}
+    for part in [1, 2] {
+        let mut grid = vec![vec![0u16; 1000]; 1000];
 
-fn part1(lines: &[Line]) {
-    let mut grid = vec![vec![0u16; 1000]; 1000];
-
-    for line in lines
-        .iter()
-        .filter(|line| line.is_vertical() || line.is_horizontal())
-    {
-        for point in line.points() {
-            grid[point.x as usize][point.y as usize] += 1;
+        if part == 1 {
+            populate_grid(
+                &mut grid,
+                lines
+                    .iter()
+                    .filter(|line| line.is_vertical() || line.is_horizontal()),
+            );
+        } else {
+            populate_grid(&mut grid, lines.iter());
         }
-    }
 
-    let mut count = 0;
-    for row in grid {
-        for cell in row {
-            if cell > 1 {
-                count += 1;
+        let mut count = 0;
+        for row in grid {
+            for cell in row {
+                if cell > 1 {
+                    count += 1;
+                }
             }
         }
-    }
 
-    println!("part1 = {}", count);
+        println!("part{} = {}", part, count);
+    }
 }
 
-fn part2(lines: &[Line]) {
-    let mut grid = vec![vec![0u16; 1000]; 1000];
-
+fn populate_grid<'a>(grid: &mut [Vec<u16>], lines: impl Iterator<Item = &'a Line>) {
     for line in lines {
         for point in line.points() {
             grid[point.x as usize][point.y as usize] += 1;
         }
     }
-
-    let mut count = 0;
-    for row in grid {
-        for cell in row {
-            if cell > 1 {
-                count += 1;
-            }
-        }
-    }
-
-    println!("part2 = {}", count);
 }
