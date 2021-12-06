@@ -30,13 +30,11 @@ fn main() {
 
     // Map where the key is a day number and the value is
     // the number of descendents of a fish born on that day
-    let mut dynprog: HashMap<i16, u64> = HashMap::with_capacity(256);
+    let mut descendents_by_birthday: HashMap<i16, u64> = HashMap::with_capacity(256);
 
     let total_days = 256;
-
-    for orig_day in (-9..=(total_days - 9)).rev() {
-        let mut day = orig_day;
-
+    for original_day in (-9..=total_days).rev() {
+        let mut day = original_day;
         let mut descendents = 0;
         let mut newborn = true;
 
@@ -49,10 +47,10 @@ fn main() {
             }
 
             if day <= total_days {
-                let diff = dynprog.get(&day).unwrap_or(&0) + 1;
-                descendents += diff;
+                // + 1 accounts for the fish being born
+                descendents += descendents_by_birthday.get(&day).unwrap_or(&0) + 1;
             } else {
-                dynprog.insert(orig_day, descendents);
+                descendents_by_birthday.insert(original_day, descendents);
                 break;
             }
         }
@@ -61,7 +59,7 @@ fn main() {
     let mut total = fishes2.len() as u64;
     for fish in fishes2 {
         let birthday = (fish as i16) - 8;
-        let descendents = dynprog.get(&birthday).unwrap_or(&0);
+        let descendents = descendents_by_birthday.get(&birthday).unwrap_or(&0);
         total += descendents;
     }
 
