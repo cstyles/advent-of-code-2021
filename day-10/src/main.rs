@@ -15,16 +15,15 @@ fn main() {
         match check_validity(line) {
             Validity::Valid => unreachable!("no lines are valid"),
             Validity::Incomplete(stack) => {
-                let score = stack.into_iter().rev().fold(0, |mut acc, elm| {
-                    acc *= 5;
-                    acc += match elm {
-                        '(' => 1,
-                        '[' => 2,
-                        '{' => 3,
-                        '<' => 4,
-                        _ => unreachable!("invalid opener: {}", elm),
-                    };
-                    acc
+                let score = stack.into_iter().rev().fold(0, |acc, elm| {
+                    acc * 5
+                        + match elm {
+                            '(' => 1,
+                            '[' => 2,
+                            '{' => 3,
+                            '<' => 4,
+                            _ => unreachable!("invalid opener: {}", elm),
+                        }
                 });
 
                 autocomplete_scores.push(score);
@@ -49,30 +48,27 @@ fn main() {
 }
 
 fn check_validity(line: &str) -> Validity {
-    let chars_orig: Vec<char> = line.chars().collect();
-    let mut chars = &chars_orig[..];
+    let chars: Vec<char> = line.chars().collect();
+    let mut chars = &chars[..];
     let mut stack: Vec<char> = vec![];
 
-    while !chars.is_empty() {
-        let head = chars[0];
+    // While there are still chars to check
+    while let Some(&head) = chars.first() {
         chars = &chars[1..];
 
         match head {
-            '(' | '[' | '{' | '<' => {
-                stack.push(head);
-                continue;
-            }
-            ')' | ']' | '}' | '>' => {
-                match (stack.pop(), head) {
-                    (None, _) => return Validity::Corrupt(head),
-                    (Some('('), ')') => continue,
-                    (Some('['), ']') => continue,
-                    (Some('{'), '}') => continue,
-                    (Some('<'), '>') => continue,
-                    _ => return Validity::Corrupt(head),
-                };
-            }
-            _ => return Validity::Corrupt(head), // unreachable
+            '(' | '[' | '{' | '<' => stack.push(head),
+            ')' | ']' | '}' | '>' => match (stack.pop(), head) {
+                // No opening character
+                (None, _) => return Validity::Corrupt(head),
+                (Some('('), ')') => continue,
+                (Some('['), ']') => continue,
+                (Some('{'), '}') => continue,
+                (Some('<'), '>') => continue,
+                // Closing character doesn't match
+                _ => return Validity::Corrupt(head),
+            },
+            _ => unreachable!("bad character: {}", head),
         };
     }
 
