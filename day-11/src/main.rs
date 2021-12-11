@@ -117,13 +117,23 @@ fn main() {
     // grid.debug();
 
     let mut flashes = 0;
-    for _i in 0..100 {
-        // println!("After step {}:", i);
-        flashes += grid.step();
-        // grid.debug();
-    }
+    let mut step = 0;
+    loop {
+        step += 1;
 
-    println!("part1 = {}", flashes);
+        let step_flashes = grid.step();
+
+        if step_flashes == 100 {
+            println!("part2 = {}", step);
+            break;
+        }
+
+        flashes += step_flashes;
+
+        if step == 100 {
+            println!("part1 = {}", flashes);
+        }
+    }
 }
 
 trait BoundedAdd {
