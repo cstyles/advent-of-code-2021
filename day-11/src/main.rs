@@ -11,26 +11,15 @@ impl Grid {
         self.0.first().unwrap().len()
     }
 
-    // @return: Number of flashes
+    // Returns the number of flashes in this step
     fn step(&mut self) -> usize {
-        // self.increase_all_octopuses();
         let count = self.flash();
         self.reset_flashed();
 
         count
     }
 
-    // Increase all octopuses' energy level by 1
-    fn increase_all_octopuses(&mut self) {
-        for row in self.0.iter_mut() {
-            for octopus in row.iter_mut() {
-                *octopus += 1;
-            }
-        }
-    }
-
     fn flash(&mut self) -> usize {
-        // Flash!
         let mut flashed: HashSet<(usize, usize)> = HashSet::new();
         let mut stack = vec![];
 
@@ -70,6 +59,7 @@ impl Grid {
         }
     }
 
+    #[allow(unused)]
     fn debug(&self) {
         for row in self.0.iter() {
             for octopus in row {
@@ -81,26 +71,19 @@ impl Grid {
 
         println!();
     }
-
-    fn neighbor_values(&self, y: usize, x: usize) -> impl Iterator<Item = &u32> {
-        neighbor_coords(y, x)
-            .into_iter()
-            .flatten()
-            .map(|(y, x)| &self.0[y][x])
-    }
 }
 
 fn neighbor_coords(y: usize, x: usize) -> [Option<(usize, usize)>; 9] {
     [
-        y.checked_sub(1).zip(x.checked_sub(1)), // -1, -1
-        y.checked_sub(1).map(|y| (y, x)),       // -1,  0
-        y.checked_sub(1).zip(x.bounded_add(1)), // -1,  1
-        x.checked_sub(1).map(|x| (y, x)),       //  0, -1
-        Some((y, x)),                           //  0,  0
-        x.bounded_add(1).map(|x| (y, x)),       //  0,  1
-        y.bounded_add(1).zip(x.checked_sub(1)), //  1, -1
-        y.bounded_add(1).map(|y| (y, x)),       //  1,  0
-        y.bounded_add(1).zip(x.bounded_add(1)), //  1,  1
+        y.checked_sub(1).zip(x.checked_sub(1)),           // -1, -1
+        y.checked_sub(1).map(|y| (y, x)),                 // -1,  0
+        y.checked_sub(1).zip(x.bounded_add::<9>(1)),      // -1,  1
+        x.checked_sub(1).map(|x| (y, x)),                 //  0, -1
+        Some((y, x)),                                     //  0,  0
+        x.bounded_add::<9>(1).map(|x| (y, x)),            //  0,  1
+        y.bounded_add::<9>(1).zip(x.checked_sub(1)),      //  1, -1
+        y.bounded_add::<9>(1).map(|y| (y, x)),            //  1,  0
+        y.bounded_add::<9>(1).zip(x.bounded_add::<9>(1)), //  1,  1
     ]
 }
 
@@ -112,23 +95,20 @@ fn main() {
         .map(|chars| chars.map(|c| c.to_digit(10).unwrap()))
         .map(Iterator::collect)
         .collect();
+
     let mut grid = Grid(grid);
-
-    // grid.debug();
-
     let mut flashes = 0;
     let mut step = 0;
+
     loop {
         step += 1;
+        let flashes_on_this_step = grid.step();
+        flashes += flashes_on_this_step;
 
-        let step_flashes = grid.step();
-
-        if step_flashes == 100 {
+        if flashes_on_this_step == 100 {
             println!("part2 = {}", step);
             break;
         }
-
-        flashes += step_flashes;
 
         if step == 100 {
             println!("part1 = {}", flashes);
@@ -139,15 +119,16 @@ fn main() {
 trait BoundedAdd {
     type Output;
 
-    fn bounded_add(&self, rhs: Self) -> Option<Self::Output>;
+    fn bounded_add<const N: usize>(&self, rhs: Self) -> Option<Self::Output>;
 }
 
 impl BoundedAdd for usize {
     type Output = usize;
 
-    fn bounded_add(&self, rhs: Self) -> Option<Self::Output> {
+    fn bounded_add<const N: usize>(&self, rhs: Self) -> Option<Self::Output> {
         let sum = self + rhs;
-        if sum > 9 {
+
+        if sum > N {
             None
         } else {
             Some(sum)
