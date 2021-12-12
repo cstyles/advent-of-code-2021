@@ -14,18 +14,24 @@ fn main() {
         entry.push(start);
     }
 
-    dbg!(&map);
+    let mut paths = 0;
+    for path in map.get("start").unwrap() {
+        let visited = HashSet::from(["start"]);
+        paths += try_path_part1(&map, visited.clone(), path);
+    }
+
+    println!("part1 = {}", paths);
 
     let mut paths = 0;
     for path in map.get("start").unwrap() {
         let visited = HashSet::from(["start"]);
-        paths += try_path(&map, visited.clone(), path);
+        paths += try_path_part2(&map, visited, path, false);
     }
 
-    println!("part1 = {}", paths);
+    println!("part2 = {}", paths);
 }
 
-fn try_path<'a>(map: &Map, mut visited: HashSet<&'a str>, target: &'a str) -> usize {
+fn try_path_part1<'a>(map: &Map, mut visited: HashSet<&'a str>, target: &'a str) -> usize {
     if target == "end" {
         return 1;
     }
@@ -38,7 +44,39 @@ fn try_path<'a>(map: &Map, mut visited: HashSet<&'a str>, target: &'a str) -> us
 
     let mut count = 0;
     for path in map.get(target).unwrap() {
-        count += try_path(map, visited.clone(), path);
+        count += try_path_part1(map, visited.clone(), path);
+    }
+
+    count
+}
+
+fn try_path_part2<'a>(
+    map: &Map,
+    mut visited: HashSet<&'a str>,
+    target: &'a str,
+    mut visited_small_twice: bool,
+) -> usize {
+    if target == "end" {
+        return 1;
+    }
+
+    if target == "start" {
+        return 0;
+    }
+
+    if is_lowercase(target) && visited.contains(target) {
+        if visited_small_twice {
+            return 0;
+        } else {
+            visited_small_twice = true;
+        }
+    }
+
+    visited.insert(target);
+
+    let mut count = 0;
+    for path in map.get(target).unwrap() {
+        count += try_path_part2(map, visited.clone(), path, visited_small_twice);
     }
 
     count
