@@ -34,8 +34,14 @@ fn main() {
     // let mut grid = vec![vec![false; 11]; 15];
     init_grid(&mut grid, dots);
 
-    let grid = fold_paper(grid, folds[0]);
+    grid = fold_paper(grid, folds[0]);
     println!("part1 = {}", count_dots(&grid));
+
+    for fold in folds.into_iter().skip(1) {
+        grid = fold_paper(grid, fold);
+    }
+
+    draw_grid(&grid);
 }
 
 fn init_grid(grid: &mut [Vec<bool>], dots: Vec<(usize, usize)>) {
