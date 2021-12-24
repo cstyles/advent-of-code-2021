@@ -1,5 +1,7 @@
+use std::collections::BinaryHeap;
+
 fn main() {
-    let input = include_str!("../test2.txt");
+    let input = include_str!("../input.txt");
 
     let mut grid: Vec<Vec<u32>> = input
         .lines()
@@ -7,22 +9,14 @@ fn main() {
         .map(|chars| chars.map(char_to_u32).collect())
         .collect();
 
-    println!("part1 = {}", find_shortest_path(&grid));
+    println!("part1 = {}", find_shortest_path_naive(&grid));
 
     extend_grid(&mut grid);
-
-    for row in &grid {
-        for cell in row {
-            print!("{} ", cell);
-        }
-        println!();
-    }
-
-    // 2822 too high
-    println!("part2 = {}", find_shortest_path(&grid));
+    println!("part2 = {}", dijkstra(&grid));
 }
 
-fn find_shortest_path(grid: &[Vec<u32>]) -> u32 {
+/// Assumes we can only move down and right
+fn find_shortest_path_naive(grid: &[Vec<u32>]) -> u32 {
     let rows = grid.len();
     let columns = grid[0].len();
     let last_row = rows - 1;
@@ -91,5 +85,98 @@ fn wrap_add(x: u32, i: u32) -> u32 {
         n - 9
     } else {
         n
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+struct Node {
+    y: usize,
+    x: usize,
+    distance: u32,
+}
+
+impl Ord for Node {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        // use `other.cmp(self)` to reverse sort and create a min-heap
+        match other.distance.cmp(&self.distance) {
+            // Break ties using position
+            std::cmp::Ordering::Equal => (other.y, other.x).cmp(&(self.y, self.x)),
+            o => o,
+        }
+    }
+}
+
+impl PartialOrd for Node {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn dijkstra(grid: &[Vec<u32>]) -> u32 {
+    let rows = grid.len();
+    let columns = grid[0].len();
+    let last_row = rows - 1;
+    let last_column = columns - 1;
+    let destination = (last_row, last_column);
+
+    let mut heap: BinaryHeap<Node> = BinaryHeap::with_capacity(rows * columns);
+    let mut distances = vec![vec![u32::MAX; columns]; rows];
+
+    distances[0][0] = 0;
+    heap.push(Node {
+        x: 0,
+        y: 0,
+        distance: 0,
+    });
+
+    while let Some(current) = heap.pop() {
+        for (y, x) in neighbors(grid, current.y, current.x).into_iter().flatten() {
+            let distance = distances[current.y][current.x] + grid[y][x];
+
+            if distances[y][x] <= distance {
+                // Skip if we've already found a shorter path to the node
+                continue;
+            } else {
+                // Otherwise set/update the shortest distance to that node
+                distances[y][x] = distance;
+            }
+
+            if (y, x) == destination {
+                return distances[last_row][last_column];
+            }
+
+            heap.push(Node { x, y, distance });
+        }
+    }
+
+    unreachable!("couldn't reach destination :(");
+}
+
+fn neighbors<T>(grid: &[Vec<T>], y: usize, x: usize) -> [Option<(usize, usize)>; 4] {
+    [
+        y.checked_sub(1).map(|y| (y, x)),                // Up
+        y.bounded_add(grid.len(), 1).map(|y| (y, x)),    // Down
+        x.checked_sub(1).map(|x| (y, x)),                // Left
+        x.bounded_add(grid[0].len(), 1).map(|x| (y, x)), // Right
+    ]
+}
+
+trait BoundedAdd {
+    type Output;
+
+    fn bounded_add(&self, max: Self, rhs: Self) -> Option<Self::Output>;
+}
+
+impl BoundedAdd for usize {
+    type Output = usize;
+
+    fn bounded_add(&self, max: Self, rhs: Self) -> Option<Self::Output> {
+        let sum = self + rhs;
+
+        if sum >= max {
+            None
+        } else {
+            Some(sum)
+        }
     }
 }
