@@ -18,11 +18,11 @@ fn main() {
 
     debug_image(&image);
     extend_image(&mut image);
-    debug_image(&image);
-    let image = apply_algorithm(image, &algorithm, 1);
-    debug_image(&image);
-    let image = apply_algorithm(image, &algorithm, 2);
-    debug_image(&image);
+
+    for i in 0..50 {
+        image = apply_algorithm(image, &algorithm, i);
+        debug_image(&image);
+    }
 
     // 5697 too high
     // 5507 too high
@@ -68,7 +68,7 @@ fn bool_to_pixel(b: bool) -> char {
 }
 
 fn extend_image(image: &mut Vec<Vec<bool>>) {
-    const N: usize = 5;
+    const N: usize = 70;
     let len = image.len();
 
     let empty_row = vec![false; len + 2 * N];
