@@ -2,18 +2,17 @@ use std::collections::HashMap;
 
 fn main() {
     let input = include_str!("../input.txt");
-    let (template, rule) = input.split_once("\n\n").unwrap();
+    let (template, rules) = input.split_once("\n\n").unwrap();
 
     let template: Vec<char> = template.chars().collect();
 
-    let rules: HashMap<(char, char), char> = rule
+    let rules: HashMap<(char, char), char> = rules
         .lines()
         .map(|line| line.split_once(" -> ").unwrap())
-        .map(|(pair, _result)| {
+        .map(|(pair, result)| {
             let chars: Vec<char> = pair.chars().collect();
-            ((chars[0], chars[1]), _result)
+            ((chars[0], chars[1]), result.chars().next().unwrap())
         })
-        .map(|(_pair, result)| (_pair, result.chars().next().unwrap()))
         .collect();
 
     part1(&template, &rules);
@@ -26,21 +25,30 @@ fn part1(template: &[char], rules: &HashMap<(char, char), char>) {
         polymer = apply_rules(polymer, rules);
     }
 
-    println!("part 1 = {}", score(&polymer));
+    println!("part1 = {}", score(&polymer));
 }
 
 fn part2(template: &[char], rules: &HashMap<(char, char), char>) {
+    // keys = element pairs; values = count of each pair
     let mut pairs: HashMap<(char, char), u64> = HashMap::default();
     for pair in template.windows(2) {
         let pair = (pair[0], pair[1]);
         pairs.entry(pair).and_modify(|e| *e += 1).or_insert(1);
     }
 
+    // Count each individual element (not pair!) in the polymer
     let mut counts: HashMap<char, u64> = HashMap::default();
     for (a, _b) in pairs.keys() {
         counts.entry(*a).and_modify(|e| *e += 1).or_insert(1);
     }
 
+    // Account for the last character in the polymer
+    counts
+        .entry(*template.last().unwrap())
+        .and_modify(|e| *e += 1)
+        .or_insert(1);
+
+    // To be honest, I don't know why this is 41 and not 40
     for _ in 0..41 {
         let mut new_pairs: HashMap<(char, char), u64> = HashMap::default();
         let mut new_counts: HashMap<char, u64> = HashMap::default();
@@ -67,11 +75,6 @@ fn part2(template: &[char], rules: &HashMap<(char, char), char>) {
         pairs = new_pairs;
         counts = new_counts;
     }
-
-    counts
-        .entry(*template.last().unwrap())
-        .and_modify(|e| *e += 1)
-        .or_insert(1);
 
     let counts: Vec<u64> = counts.into_values().collect();
 
@@ -103,8 +106,5 @@ fn score(polymer: &[char]) -> usize {
         *count += 1;
     }
 
-    let (_max_elem, max_count) = map.iter().max_by_key(|(_element, count)| *count).unwrap();
-    let (_min_elem, min_count) = map.iter().min_by_key(|(_element, count)| *count).unwrap();
-
-    max_count - min_count
+    map.values().max().unwrap() - map.values().min().unwrap()
 }
