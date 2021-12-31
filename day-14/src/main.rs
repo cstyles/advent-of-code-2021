@@ -16,12 +16,69 @@ fn main() {
         .map(|(_pair, result)| (_pair, result.chars().next().unwrap()))
         .collect();
 
-    let mut polymer = template;
+    part1(&template, &rules);
+    part2(&template, &rules);
+}
+
+fn part1(template: &[char], rules: &HashMap<(char, char), char>) {
+    let mut polymer = template.to_vec();
     for _ in 0..10 {
-        polymer = apply_rules(polymer, &rules);
+        polymer = apply_rules(polymer, rules);
     }
 
     println!("part 1 = {}", score(&polymer));
+}
+
+fn part2(template: &[char], rules: &HashMap<(char, char), char>) {
+    let mut pairs: HashMap<(char, char), u64> = HashMap::default();
+    for pair in template.windows(2) {
+        let pair = (pair[0], pair[1]);
+        pairs.entry(pair).and_modify(|e| *e += 1).or_insert(1);
+    }
+
+    let mut counts: HashMap<char, u64> = HashMap::default();
+    for (a, _b) in pairs.keys() {
+        counts.entry(*a).and_modify(|e| *e += 1).or_insert(1);
+    }
+
+    for _ in 0..41 {
+        let mut new_pairs: HashMap<(char, char), u64> = HashMap::default();
+        let mut new_counts: HashMap<char, u64> = HashMap::default();
+
+        for (pair, &count) in &pairs {
+            let middle = rules.get(pair).unwrap();
+
+            new_pairs
+                .entry((pair.0, *middle))
+                .and_modify(|e| *e += count)
+                .or_insert(count);
+
+            new_pairs
+                .entry((*middle, pair.1))
+                .and_modify(|e| *e += count)
+                .or_insert(count);
+
+            new_counts
+                .entry(pair.0)
+                .and_modify(|e| *e += count)
+                .or_insert(count);
+        }
+
+        pairs = new_pairs;
+        counts = new_counts;
+    }
+
+    counts
+        .entry(*template.last().unwrap())
+        .and_modify(|e| *e += 1)
+        .or_insert(1);
+
+    let counts: Vec<u64> = counts.into_values().collect();
+
+    println!(
+        "part2 = {}",
+        counts.iter().max().unwrap() - counts.iter().min().unwrap()
+    );
 }
 
 fn apply_rules(polymer: Vec<char>, rules: &HashMap<(char, char), char>) -> Vec<char> {
