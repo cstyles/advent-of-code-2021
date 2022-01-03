@@ -67,7 +67,7 @@ fn parse_range(string: &str) -> Option<RangeInclusive<usize>> {
 }
 
 fn main() {
-    let input = include_str!("../input.txt");
+    let input = include_str!("../test3.txt");
     let steps: Vec<Step> = input
         .lines()
         .filter_map(|line| Step::try_from(line).ok())
