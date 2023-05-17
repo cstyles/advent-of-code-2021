@@ -187,6 +187,17 @@ impl std::ops::Add for Tree {
     }
 }
 
+impl std::ops::Add for &Tree {
+    type Output = Tree;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::Output::Pair {
+            left: Box::new(self.clone()),
+            right: Box::new(rhs.clone()),
+        }
+    }
+}
+
 impl std::fmt::Display for Tree {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -206,19 +217,39 @@ impl std::fmt::Display for Tree {
 fn main() {
     let input = include_str!("../input.txt");
     // let input = include_str!("../test_input.txt");
-    let mut numbers = input.lines().map(Tree::parse);
+    let numbers: Vec<Tree> = input.lines().map(Tree::parse).collect();
+    part1(numbers.clone());
+    part2(numbers);
+}
+
+fn part1(numbers: Vec<Tree>) {
+    let mut numbers = numbers.into_iter();
     let mut sum = numbers.next().unwrap();
     for number in numbers {
         sum = sum + number;
         sum.reduce();
     }
 
-    println!("{sum}");
+    // println!("{sum}");
     println!("part1 = {}", sum.magnitude());
+}
 
-    // split_test();
-    // explode_test1();
-    // explode_test2();
+fn part2(numbers: Vec<Tree>) {
+    let mut max = 0;
+
+    for a in &numbers {
+        for b in &numbers {
+            if a == b {
+                continue;
+            }
+
+            let mut sum = a + b;
+            sum.reduce();
+            max = sum.magnitude().max(max);
+        }
+    }
+
+    println!("part2 = {max}");
 }
 
 #[allow(unused)]
