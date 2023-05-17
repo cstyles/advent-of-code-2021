@@ -134,30 +134,28 @@ impl Tree {
         }
     }
 
-    fn parse_inner<I: Iterator<Item = char>>(mut chars: I) -> (I, Self) {
+    fn parse_inner<I: Iterator<Item = char>>(chars: &mut I) -> Self {
         match chars.next().unwrap() {
             '[' => {
-                let (mut chars, left) = Tree::parse_inner(chars);
+                let left = Tree::parse_inner(chars);
                 assert_eq!(Some(','), chars.next());
-                let (mut chars, right) = Tree::parse_inner(chars);
+                let right = Tree::parse_inner(chars);
                 assert_eq!(Some(']'), chars.next());
 
-                let tree = Self::Pair {
+                Self::Pair {
                     left: Box::new(left),
                     right: Box::new(right),
-                };
-
-                (chars, tree)
+                }
             }
             c => {
                 let number = c.to_digit(10).unwrap();
-                (chars, Self::Number(number))
+                Self::Number(number)
             }
         }
     }
 
     fn parse(string: &str) -> Self {
-        Self::parse_inner(string.chars()).1
+        Self::parse_inner(&mut string.chars())
     }
 
     fn reduce(&mut self) {
