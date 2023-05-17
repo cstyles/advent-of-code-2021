@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 use ExplodeResult::*;
 use SplitResult::*;
 use Tree::*;
@@ -51,7 +49,6 @@ impl Tree {
         }
     }
 
-    // fn try_explode(&mut self, layer: usize) -> (Option<u32>, Option<u32>) {
     fn try_explode(&mut self, layer: usize) -> ExplodeResult {
         match (self, layer) {
             (Number(_), _) => DidNotExplode,
@@ -205,13 +202,6 @@ impl std::fmt::Display for Tree {
     }
 }
 
-//   ^
-//  / \
-// 1   ^
-//    / \
-//   ^   4
-//  / \
-// 2   3
 fn main() {
     let input = include_str!("../input.txt");
     // let input = include_str!("../test_input.txt");
@@ -248,99 +238,4 @@ fn part2(numbers: Vec<Tree>) {
     }
 
     println!("part2 = {max}");
-}
-
-#[allow(unused)]
-fn explode_test1() {
-    let mut tree = Pair {
-        left: Box::new(Pair {
-            left: Box::new(Pair {
-                left: Box::new(Pair {
-                    left: Box::new(Pair {
-                        left: Box::new(Number(9)),
-                        right: Box::new(Number(8)),
-                    }),
-                    right: Box::new(Number(1)),
-                }),
-                right: Box::new(Number(2)),
-            }),
-            right: Box::new(Number(3)),
-        }),
-        right: Box::new(Number(4)),
-    };
-    println!("{tree:#?}");
-
-    let parsed = Tree::parse("[[[[[9,8],1],2],3],4]");
-    assert_eq!(parsed, tree);
-
-    tree.try_explode(0);
-    println!("{tree:#?}");
-
-    let parsed = Tree::parse("[[[[0,9],2],3],4]");
-    assert_eq!(parsed, tree);
-}
-
-#[allow(unused)]
-fn explode_test2() {
-    let mut tree = Pair {
-        left: Box::new(Number(7)),
-        right: Box::new(Pair {
-            left: Box::new(Number(6)),
-            right: Box::new(Pair {
-                left: Box::new(Number(5)),
-                right: Box::new(Pair {
-                    left: Box::new(Number(4)),
-                    right: Box::new(Pair {
-                        left: Box::new(Number(3)),
-                        right: Box::new(Number(2)),
-                    }),
-                }),
-            }),
-        }),
-    };
-    println!("{tree:#?}");
-
-    let parsed = Tree::parse("[7,[6,[5,[4,[3,2]]]]]");
-    assert_eq!(parsed, tree);
-
-    tree.try_explode(0);
-    println!("{tree:#?}");
-    println!("{tree}");
-
-    let parsed = Tree::parse("[7,[6,[5,[7,0]]]]");
-    assert_eq!(parsed, tree);
-}
-
-#[allow(unused)]
-fn split_test() {
-    let a = Tree::parse("[[[[4,3],4],4],[7,[[8,4],9]]]");
-    let b = Tree::parse("[1,1]");
-    let mut tree = a.add(b);
-    assert_eq!("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]", tree.to_string());
-
-    assert_eq!(Exploded, tree.explode());
-    assert_eq!("[[[[0,7],4],[7,[[8,4],9]]],[1,1]]", tree.to_string());
-    assert_eq!(Exploded, tree.explode());
-    assert_eq!("[[[[0,7],4],[15,[0,13]]],[1,1]]", tree.to_string());
-    assert_eq!(DidNotExplode, tree.explode());
-
-    assert_eq!(DidSplit, tree.split());
-    assert_eq!("[[[[0,7],4],[[7,8],[0,13]]],[1,1]]", tree.to_string());
-    assert_eq!(DidSplit, tree.split());
-    assert_eq!("[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]", tree.to_string());
-    assert_eq!(DidNotSplit, tree.split());
-
-    assert_eq!(Exploded, tree.explode());
-    assert_eq!("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", tree.to_string());
-    assert_eq!(DidNotExplode, tree.explode());
-    assert_eq!(DidNotSplit, tree.split());
-
-    // Try again, this time with `reduce`
-    let a = Tree::parse("[[[[4,3],4],4],[7,[[8,4],9]]]");
-    let b = Tree::parse("[1,1]");
-    let mut tree = a.add(b);
-    tree.reduce();
-    assert_eq!("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", tree.to_string());
-
-    // println!("{tree}");
 }
