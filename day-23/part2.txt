@@ -1,0 +1,47 @@
+#############
+#...........#
+###A#D#B#D###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#A#C#
+  #########
+A=0 B=0 C=0 D=0
+#############
+#..........D#
+###A#D#B#.###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#A#C#
+  #########
+A=0 B=0 C=0 D=3
+#############
+#A.........D#
+###.#D#B#.###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#A#C#
+  #########
+A=3 B=0 C=0 D=3
+#############
+#A........DD#
+###.#D#B#.###
+  #.#C#B#A#
+  #D#B#A#C#
+  #B#C#A#C#
+  #########
+A=3 B=0 C=0 D=12
+#############
+#AA.......DD#
+###.#D#B#.###
+  #.#C#B#.#
+  #D#B#A#C#
+  #B#C#A#C#
+  #########
+A=12 B=0 C=0 D=12
+
+- move something out of room into hallway
+  - at most 4 source possibilities (top of each stack)
+  - at most 7 destination possibilities (open spots in hallway)
+- move something out of hallway into final spot
+  - at most 4 destination possibilities (top of each stack)
+  - at most 7 source possibilities (open spots in hallway)

@@ -1,0 +1,28 @@
+#############
+#...........#
+###A#D#B#D###
+  #B#C#A#C#
+  #########
+A=0 B=0 C=0 D=0
+
+minimum Ds = 11
+minimum Cs = 11
+minimum Bs = 10
+minimum As = 12
+theoretical minimum = 12,212
+
+-- Part 2 --
+
+#############
+#...........#
+###A#D#B#D###
+  #D#C#B#A#
+  #D#B#A#C#
+  #B#C#A#C#
+  #########
+
+minimum Ds = 35
+minimum Cs = 31
+minimum Bs = 28
+minimum As = 36
+theoretical minimum = 38,416
