@@ -1,0 +1,6 @@
+(lang dune 2.9)
+(name aoc2021)
+(package (name day_01))
+(package (name day_02))
+(package (name day_07))
+(package (name day_08))

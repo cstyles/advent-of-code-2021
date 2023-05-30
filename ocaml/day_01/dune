@@ -1,0 +1,5 @@
+(executable
+  (package day_01)
+  (public_name day_01)
+  (name day_01)
+  (libraries util))

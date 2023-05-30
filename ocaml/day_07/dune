@@ -1,0 +1,5 @@
+(executable
+  (package day_07)
+  (public_name day_07)
+  (name day_07)
+  (libraries batteries))
