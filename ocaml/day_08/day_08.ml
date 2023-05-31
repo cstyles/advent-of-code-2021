@@ -26,32 +26,33 @@ let char_list_contains list string =
   List.for_all (fun c -> String.contains string c) list
 
 let deduce_zero_six_nine bd cf zero_six_nine =
-  let zero = ref "" in
-  let six = ref "" in
-  let nine = ref "" in
-  List.iter
-    (fun number ->
-      (* If a number doesn't contain both `b` and `d`, it must be 0 *)
-      if not (char_list_contains bd number) then zero := number
-        (* If a number contain both `c` and `f`, it must be 9 *)
-      else if char_list_contains cf number then nine := number
-      else six := number)
-    zero_six_nine;
-  (!zero, !six, !nine)
+  let rec deduce zero six nine bd cf zero_six_nine =
+    match zero_six_nine with
+    | [] -> (zero, six, nine)
+    | number :: rest ->
+        (* If a number doesn't contain both `b` and `d`, it must be 0 *)
+        if not (char_list_contains bd number) then
+          deduce number six nine bd cf rest
+          (* If a number contain both `c` and `f`, it must be 9 *)
+        else if char_list_contains cf number then
+          deduce zero six number bd cf rest
+        else deduce zero number nine bd cf rest
+  in
+  deduce "" "" "" bd cf zero_six_nine
 
 let deduce_two_three_five bd cf two_three_five =
-  let two = ref "" in
-  let three = ref "" in
-  let five = ref "" in
-  List.iter
-    (fun number ->
-      (* If a number contains both `b` and `d`, it must be 5 *)
-      if char_list_contains bd number then five := number
-        (* If a number contains both `c` and `f`, it must be 3 *)
-      else if char_list_contains cf number then three := number
-      else two := number)
-    two_three_five;
-  (!two, !three, !five)
+  let rec deduce two three five bd cf two_three_five =
+    match two_three_five with
+    | [] -> (two, three, five)
+    | number :: rest ->
+        (* If a number contains both `b` and `d`, it must be 5 *)
+        if char_list_contains bd number then deduce two three number bd cf rest
+          (* If a number contains both `c` and `f`, it must be 3 *)
+        else if char_list_contains cf number then
+          deduce two number five bd cf rest
+        else deduce number three five bd cf rest
+  in
+  deduce "" "" "" bd cf two_three_five
 
 let sort_str string =
   BatString.explode string |> List.sort Char.compare |> BatString.of_list
@@ -78,7 +79,6 @@ let decode line =
   let two, three, five = deduce_two_three_five bd cf two_three_five in
 
   (* == Decode == *)
-  let value = ref 0 in
   let map = Hashtbl.create 10 in
   Hashtbl.add map (sort_str zero) 0;
   Hashtbl.add map (sort_str one) 1;
@@ -90,14 +90,16 @@ let decode line =
   Hashtbl.add map (sort_str seven) 7;
   Hashtbl.add map (sort_str eight) 8;
   Hashtbl.add map (sort_str nine) 9;
+
   String.split_on_char ' ' output
   |> List.rev
   |> enumerate
-  |> List.iter (fun (digit, number) ->
+  |> List.fold_left
+       (fun acc (digit, number) ->
          let number = sort_str number in
          let order_of_magnitude = BatInt.pow 10 digit in
-         value := !value + (order_of_magnitude * Hashtbl.find map number));
-  !value
+         acc + (order_of_magnitude * Hashtbl.find map number))
+       0
 
 let part2 = List.map decode input |> Util.sum;;
 
