@@ -5,3 +5,4 @@
 (package (name day_07))
 (package (name day_08))
 (package (name day_10))
+(package (name day_12))
