@@ -1,17 +1,9 @@
-module Set = Set.Make (struct
-  type t = string
-
-  let compare = compare
-end)
-
-module Map = Map.Make (struct
-  type t = string
-
-  let compare = compare
-end)
+module Set = Set.Make (String)
+module Map = Map.Make (String)
 
 let input = Util.input_lines "day_12/input.txt"
 
+(* Inside an Option: Inserts into a list or creates a new list *)
 let insert key value map =
   match Map.find_opt key map with
   | None -> Map.add key [ value ] map
@@ -29,11 +21,14 @@ let graph =
 
 let is_lowercase str = str = String.lowercase_ascii str
 
+(* Common recursive behavior between parts 1 & 2. *)
 let try_path part_func target visited =
   let visited = Set.add target visited in
   let paths = Map.find target graph in
   List.fold_left (fun count path -> count + part_func visited path) 0 paths
 
+(* Use rules from part 1 to recursively explore caves.
+   Returns the number of possible paths from the target to "end". *)
 let rec try_path_part1 visited target =
   if target = "end"
   then 1
@@ -41,6 +36,8 @@ let rec try_path_part1 visited target =
   then 0
   else try_path try_path_part1 target visited
 
+(* Use rules from part 2 to recursively explore caves.
+   Returns the number of possible paths from the target to "end". *)
 let rec try_path_part2 visited_small_twice visited target =
   if target = "end"
   then 1
@@ -52,15 +49,19 @@ let rec try_path_part2 visited_small_twice visited target =
     then 0
     else try_path (try_path_part2 true) target visited
   else try_path (try_path_part2 visited_small_twice) target visited
+
+let part1 =
+  Map.find "start" graph
+  |> List.map (try_path_part1 (Set.add "start" Set.empty))
+  |> Util.sum
+
+let part2 =
+  Map.find "start" graph
+  |> List.map (try_path_part2 false (Set.add "start" Set.empty))
+  |> Util.sum
 ;;
 
-Map.find "start" graph
-|> List.map (try_path_part1 (Set.add "start" Set.empty))
-|> Util.sum
-|> Util.println_int
-;;
-
-Map.find "start" graph
-|> List.map (try_path_part2 false (Set.add "start" Set.empty))
-|> Util.sum
-|> Util.println_int
+print_string "part1 = ";
+Util.println_int part1;
+print_string "part2 = ";
+Util.println_int part2
