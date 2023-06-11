@@ -18,7 +18,7 @@ fn main() {
         .collect();
 
     part1(image.clone(), &algorithm);
-    // part2(image, &algorithm);
+    part2(image, &algorithm);
 }
 
 fn part1(mut image: Vec<Vec<bool>>, algorithm: &[bool]) {
@@ -33,16 +33,16 @@ fn part1(mut image: Vec<Vec<bool>>, algorithm: &[bool]) {
 }
 
 fn part2(mut image: Vec<Vec<bool>>, algorithm: &[bool]) {
-    extend_image(&mut image, 50, false);
+    extend_image(&mut image, 5, false);
     // debug_image(&image);
 
-    // for i in 0..50 {
-    for i in 0..2 {
-        image = apply_algorithm(image, algorithm, todo!());
-        // extend_image(&mut image, 1, false);
-        extend_image(&mut image, 1, i % 2 == 0);
+    for i in 0..50 {
+        let fill = i % 2 != 0;
+        image = apply_algorithm(image, algorithm, fill);
+        extend_image(&mut image, 1, !fill);
         // debug_image(&image);
     }
+
     println!("part2 = {}", count_pixels(&image));
 }
 
