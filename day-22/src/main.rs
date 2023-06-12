@@ -104,6 +104,27 @@ impl Step2 {
 
         x * y * z * sign
     }
+
+    fn clamp(mut self) -> Option<Self> {
+        if self.xs.0 < -50
+            || self.xs.1 > 50
+            || self.ys.0 < -50
+            || self.ys.1 > 50
+            || self.zs.0 < -50
+            || self.zs.1 > 50
+        {
+            return None;
+        }
+
+        self.xs.0 = self.xs.0.max(-50);
+        self.xs.1 = self.xs.1.min(50);
+        self.ys.1 = self.ys.1.max(-50);
+        self.ys.1 = self.ys.1.min(50);
+        self.zs.1 = self.zs.1.max(-50);
+        self.zs.1 = self.zs.1.min(50);
+
+        Some(self)
+    }
 }
 
 fn parse_range2(string: &str) -> (isize, isize) {
@@ -148,14 +169,16 @@ fn parse_range(string: &str) -> Option<RangeInclusive<usize>> {
 }
 
 fn main() {
-    // part1();
-    part2();
+    let input = include_str!("../input.txt");
+    let steps = input.lines().map(Step2::parse);
+    let part1_steps = steps.clone().filter_map(Step2::clamp).collect();
+    let part2_steps = steps.collect();
+
+    part(1, part1_steps);
+    part(2, part2_steps);
 }
 
-fn part2() {
-    let input = include_str!("../input.txt");
-    let steps: Vec<Step2> = input.lines().map(Step2::parse).collect();
-
+fn part(part: u8, steps: Vec<Step2>) {
     let mut cubes: Vec<Step2> = vec![];
     for step in steps {
         let to_push: Vec<Step2> = cubes
@@ -171,27 +194,5 @@ fn part2() {
     }
 
     let total_volume: isize = cubes.into_iter().map(|cube| cube.volume()).sum();
-    println!("part2 = {total_volume}");
-}
-
-#[allow(unused)]
-fn part1() {
-    let input = include_str!("../input.txt");
-    let steps: Vec<Step> = input
-        .lines()
-        .filter_map(|line| Step::try_from(line).ok())
-        .collect();
-
-    // Inddex 0 => -50, 50 => 0, 100 => 50
-    let mut cuboid = [false; 101 * 101 * 101];
-
-    for step in &steps {
-        for (x, y, z) in step.coords() {
-            cuboid[z * 101 * 101 + y * 101 + x] = step.on;
-        }
-    }
-
-    let count = cuboid.into_iter().filter(|x| *x).count();
-
-    println!("part1 = {}", count);
+    println!("part{part} = {total_volume}");
 }
